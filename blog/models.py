@@ -20,24 +20,33 @@ class PostModel(models.Model):
     title           = models.CharField(
                             max_length=250,
                             default='New Title',
+                            #Cambiamos el nombre del campo cuando se despliega pero no en la base de datos
                             verbose_name='Post Title',
+                            #definir que este campo es único para todas las instancias
                             unique=True,
+                            #personalizar los mensajes de error
                             error_messages={
                                 "unique": "This title is not unique, please try again"
                             },
+                            #Incluir texto de ayuda
                             help_text="Must be unique title")
     slug            = models.SlugField(
                             null=True,
+                            #blank, hace que el campo por ejemplo, aparezca en el admin y se pueda editar desde el admin
                             blank=True,
+                            #si queremos que no se pueda editar desde el admin (ni desde un formulario), indicamos editable False
                             #editable=False
                             )
     content         = models.TextField(null=True, blank=True)
     publish         = models.CharField(max_length=120, choices=PUBLISH_CHOICES, default='draft')
     view_count      = models.IntegerField(default=0)
-    publish_data    = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)
+    publish_data    = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)}
+                                                        #incluímos un validator antes importado
     author_email    = models.CharField(max_length=240, validators=[validate_author_email], null=True, blank=True)
 
+#Hacer override del method Save
     def save(self, *args, **kwargs):
+#usar print, para que se vean mensajes en el terminarl, es como console.log en JS
         print("hola")
         if not self.slug and self.title:
             self.slug =slugify(self.title)
@@ -50,6 +59,7 @@ class PostModel(models.Model):
     def __str__(self):
         return smart_text(self.title)
 
+#Uso de Django Signals
 def blog_post_model_pre_save_receiver(sender, instance, *args, **kwargs):
     print("before")
     if not instance.slug and instance.title:
